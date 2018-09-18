@@ -14,7 +14,7 @@ const date = new Date()
 const queue = []
   , logPath = process.env.LOG_FILE || path.resolve(__dirname, '../logs');
 
-if (!fs.existsSync()) {
+if (!fs.existsSync(logPath)) {
   fs.mkdirSync(logPath);
 }
 
@@ -51,7 +51,7 @@ defaultRouter.post('/log', (req, res) => {
   res.status(201).end();
 });
 
-const port = process.env.PORT || '3044';
+const port = parseInt(process.env.PORT || '3044');
 
 app
   .use(cors())
