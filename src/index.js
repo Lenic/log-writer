@@ -51,9 +51,11 @@ defaultRouter.post('/log', (req, res) => {
   res.status(201).end();
 });
 
+const port = process.env.PORT || '3044';
+
 app
   .use(cors())
   .use(bodyParser.urlencoded({ extended: false }))
   .use(bodyParser.json())
   .use(defaultRouter)
-  .listen(3000, () => console.log('Listening on http://localhost:3000'));
+  .listen(port, () => console.log(`Listening on http://localhost:${port}`));

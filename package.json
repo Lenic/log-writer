@@ -13,8 +13,8 @@
     "underscore": "^1.9.1"
   },
   "scripts": {
-    "dev": "cross-env LOG_FILE=${pwd}/logs node .",
-    "dev:linux": "cross-env LOG_FILE=`pwd`/logs node .",
-    "start": "cross-env LOG_FILE=/var/log/log_lighttpd_php/port-server pm2 start ."
+    "dev": "cross-env PORT=3044 LOG_FILE=${pwd}/logs node .",
+    "dev:linux": "cross-env PORT=3044 LOG_FILE=`pwd`/logs node .",
+    "start": "cross-env PORT=3044 LOG_FILE=/var/log/log_lighttpd_php/port-server pm2 start ."
   }
 }
