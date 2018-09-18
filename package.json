@@ -9,10 +9,12 @@
     "cors": "^2.8.4",
     "cross-env": "^5.2.0",
     "express": "^4.16.3",
-    "pm2": "^3.1.2"
+    "pm2": "^3.1.2",
+    "underscore": "^1.9.1"
   },
   "scripts": {
-    "dev": "cross-env LOG_FILE=/c/Users/Lenic/test/port-server/a.log node .",
-    "start": "pm2 start ."
+    "dev": "cross-env LOG_FILE=${pwd}/logs node .",
+    "dev:linux": "cross-env LOG_FILE=`pwd`/logs node .",
+    "start": "cross-env LOG_FILE=`pwd`/port-server pm2 start ."
   }
 }

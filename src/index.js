@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var cors = require('cors');
+var _ = require('underscore');
 var Express = require('express');
 var bodyParser = require('body-parser');
 
@@ -11,7 +12,13 @@ const date = new Date()
   , dateString = `${date.getFullYear()}${date.getMonth()}${date.getDay()}`;
 
 const queue = []
-  , logFilename = process.env.LOG_FILE || path.resolve(__dirname, `../logs/${dateString}.log`)
+  , logPath = process.env.LOG_FILE || path.resolve(__dirname, '../logs');
+
+if (!fs.existsSync()) {
+  fs.mkdirSync(logPath);
+}
+
+const logFilename = path.resolve(logPath, `${dateString}.log`)
   , doAction = () => {
     if (queue.length) {
       const item = queue.shift();
@@ -31,9 +38,15 @@ const queue = []
 doAction();
 
 defaultRouter.post('/log', (req, res) => {
-  const content = JSON.stringify(req.body);
+  if (!_.isArray(req.body)) {
+    return res.status(400).end();
+  }
 
-  queue.push(content);
+  for (let i = 0; i < req.body.length; i++) {
+    const content = JSON.stringify(req.body[i]);
+
+    queue.push(content);
+  }
 
   res.status(201).end();
 });
