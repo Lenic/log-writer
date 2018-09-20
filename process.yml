@@ -1,9 +1,10 @@
 apps:
-  - name     : port-server
-    script   : src/index.js
-    instances: 2
-    exec_mode: cluster
-    env      :
-      PORT    : 3044
-      NODE_ENV: production
-      LOG_FILE: /var/log/log_lighttpd_php/port-server
+  - name        : port-server
+    script      : src/index.js
+    instances   : 2
+    exec_mode   : cluster
+    instance_var: INSTANCE_ID
+    env         :
+      PORT      : 3044
+      NODE_ENV  : production
+      LOG_FILE  : /var/log/log_lighttpd_php/port-server
