@@ -1,39 +1,41 @@
-var fs = require('fs');
-var path = require('path');
-var cors = require('cors');
-var _ = require('underscore');
-var Express = require('express');
-var bodyParser = require('body-parser');
-
-const app = new Express()
-  , defaultRouter = new Express.Router();
-
-const date = new Date()
-  , dateString = `${date.getFullYear()}${date.getMonth()}${date.getDay()}`;
+const qs = require('qs');
+const fs = require('fs');
+const path = require('path');
+const cors = require('cors');
+const _ = require('underscore');
+const URL = require('url-parse');
+const Express = require('express');
+const UAParser = require('ua-parser-js');
+const bodyParser = require('body-parser');
 
 const queue = []
-  , logPath = process.env.LOG_FILE || path.resolve(__dirname, '../logs');
+  , app = new Express()
+  , defaultRouter = new Express.Router()
+  , datePadding = value => value < 10 ? `0${value}` : value
+  , logPath = process.env.LOG_FILE || path.resolve(__dirname, '../logs')
+  , getDateString = date => `${date.getFullYear()}${datePadding(date.getMonth() + 1)}${datePadding(date.getDate())}`;
 
 if (!fs.existsSync(logPath)) {
   fs.mkdirSync(logPath);
 }
 
-const logFilename = path.resolve(logPath, `${dateString}.log`)
-  , doAction = () => {
-    if (queue.length) {
-      const item = queue.shift();
+const doAction = () => {
+  if (queue.length) {
+    const item = queue.shift()
+      , dateString = getDateString(new Date())
+      , logFilename = path.resolve(logPath, `${dateString}.log`);
 
-      fs.appendFile(logFilename, `${item}\n`, 'utf-8', err => {
-        err && queue.push(item);
-      });
-    }
+    fs.appendFile(logFilename, `${item}\n`, 'utf-8', err => {
+      err && queue.push(item);
+    });
+  }
 
-    if (queue.length) {
-      doAction();
-    } else {
-      setTimeout(doAction, 10);
-    }
-  };
+  if (queue.length) {
+    doAction();
+  } else {
+    setTimeout(doAction, 10);
+  }
+};
 
 doAction();
 
@@ -42,10 +44,23 @@ defaultRouter.post('/log', (req, res) => {
     return res.status(400).end();
   }
 
-  for (let i = 0; i < req.body.length; i++) {
-    const content = JSON.stringify(req.body[i]);
+  const info = {
+    ip: req.ip,
+    ips: req.ips,
+    serverTimestamp: Date.now(),
+    referer: new URL(req.get('Referer'), null, v => qs.parse(v.slice(1))),
+    userAgent: (new UAParser(req.get('User-Agent'))).getResult(),
+  };
 
-    queue.push(content);
+  for (let i = 0; i < req.body.length; i++) {
+    const item = req.body[i]
+      , content = {
+        request: info,
+        body: _.omit(item, 'href'),
+        href: new URL(item.href, null, v => qs.parse(v.slice(1))),
+      };
+
+    queue.push(JSON.stringify(content));
   }
 
   res.status(201).end();
