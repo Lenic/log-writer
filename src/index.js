@@ -8,12 +8,12 @@ const Express = require('express');
 const UAParser = require('ua-parser-js');
 const bodyParser = require('body-parser');
 
-const queue = []
-  , app = new Express()
-  , defaultRouter = new Express.Router()
-  , datePadding = value => value < 10 ? `0${value}` : value
-  , logPath = process.env.LOG_FILE || path.resolve(__dirname, '../logs')
-  , getDateString = date => `${date.getFullYear()}${datePadding(date.getMonth() + 1)}${datePadding(date.getDate())}`;
+const queue = [],
+  app = new Express(),
+  defaultRouter = new Express.Router(),
+  datePadding = value => (value < 10 ? `0${value}` : value),
+  logPath = process.env.LOG_FILE || path.resolve(__dirname, '../logs'),
+  getDateString = date => `${date.getFullYear()}${datePadding(date.getMonth() + 1)}${datePadding(date.getDate())}`;
 
 if (!fs.existsSync(logPath)) {
   fs.mkdirSync(logPath);
@@ -21,9 +21,9 @@ if (!fs.existsSync(logPath)) {
 
 const doAction = () => {
   if (queue.length) {
-    const item = queue.shift()
-      , dateString = getDateString(new Date())
-      , logFilename = path.resolve(logPath, `${dateString}.log`);
+    const item = queue.shift(),
+      dateString = getDateString(new Date()),
+      logFilename = path.resolve(logPath, `${dateString}.log`);
 
     fs.appendFile(logFilename, `${item}\n`, 'utf-8', err => {
       err && queue.push(item);
@@ -49,15 +49,15 @@ defaultRouter.post('/log', (req, res) => {
     ips: req.ips,
     serverTimestamp: Date.now(),
     referer: new URL(req.get('Referer'), null, v => qs.parse(v.slice(1))),
-    userAgent: (new UAParser(req.get('User-Agent'))).getResult(),
+    userAgent: new UAParser(req.get('User-Agent')).getResult()
   };
 
   for (let i = 0; i < req.body.length; i++) {
-    const item = req.body[i]
-      , content = {
+    const item = req.body[i],
+      content = {
         request: info,
         body: _.omit(item, 'href'),
-        href: new URL(item.href, null, v => qs.parse(v.slice(1))),
+        href: new URL(item.href, null, v => qs.parse(v.slice(1)))
       };
 
     queue.push(JSON.stringify(content));
